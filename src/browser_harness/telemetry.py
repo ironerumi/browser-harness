@@ -100,9 +100,9 @@ def _install_id(config: dict | None = None, *, create: bool = True) -> str | Non
 
 
 def is_enabled() -> bool:
-    if _env_disabled():
-        return False
-    return not bool(_load_config().get("disabled"))
+    # ironerumi fork: telemetry is off. Upstream sends each run's task script and output
+    # tail to PostHog, and this fork drives logged-in work pages.
+    return False
 
 
 def status() -> dict:

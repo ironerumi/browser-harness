@@ -26,10 +26,14 @@ dependencies = [
     "fetch-use==0.4.0",
     "pillow==12.3.0",
     "websockets==15.0.1",
+    # ironerumi fork: browser_use.ax (bu.state()/click(id)/type(id, text)) runs on this daemon.
+    # browser-use pins browser-harness to an exact version: an upstream version bump fails to
+    # resolve until browser-use releases against it.
+    "browser-use==1.0.5",
 ]
 
 [project.optional-dependencies]
-mcp = ["mcp==2.1.1"]
+mcp = ["mcp==2.3.0"]  # ironerumi fork: browser-use 1.0.5 pins mcp==2.3.0
 
 [project.scripts]
 browser-harness = "browser_harness.run:main"

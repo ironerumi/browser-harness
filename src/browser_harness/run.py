@@ -29,7 +29,7 @@ from .admin import (
     stop_remote_daemon,
     sync_local_profile,
 )
-from . import auth, recorder, telemetry
+from . import auth, automation_browser, recorder, telemetry
 from .helpers import *
 
 HELP = """Browser Harness
@@ -242,6 +242,7 @@ def main():
     args = sys.argv[1:]
     if args and args[0] == "telemetry":
         sys.exit(telemetry.run_telemetry_cli(args[1:]))
+    automation_browser.apply()
     _helper_trace.clear()
     _helper_call_count = 0
     start_time = time.monotonic()
