@@ -1,4 +1,12 @@
-"""Select the automation browser; see install.md for the identity contract."""
+"""Attach to this machine's automation browser by identity (ironerumi fork).
+
+The machine's automation browser is declared in ~/.config/automation-browser/config
+(dotfiles scripts/setup-automation-browser.sh): one Chrome per identity, each on a
+fixed loopback port. The identity comes from BU_NAME: a name starting with
+`ai-search` attaches to the `ai-search` Chrome, any other name (or none) to `work`.
+An explicit BU_CDP_URL / BU_CDP_WS / BU_BROWSER_ID wins, and a machine without the
+config file keeps upstream's local Chrome discovery.
+"""
 from __future__ import annotations
 
 import os

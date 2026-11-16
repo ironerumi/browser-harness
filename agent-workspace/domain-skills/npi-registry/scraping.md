@@ -424,7 +424,7 @@ Output (from the run on 2026-11-16, 04:57 UTC):
 
 ```text
 1 1134262819 MASSACHUSETTS GENERAL HOSPITAL NPI-2 | General Acute Care Hospital 99562 MA | 55 FRUIT ST BOSTON MA
-HTTP/2 200
+HTTP/2 200 
 content-type: application/json
 cache-control: no-cache, no-store, must-revalidate
 x-cache: Miss from cloudfront

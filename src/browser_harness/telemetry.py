@@ -1,4 +1,4 @@
-"""Upstream telemetry machinery; fork policy is documented in install.md."""
+"""Upstream telemetry machinery; fork policy is enforced in is_enabled()."""
 
 from __future__ import annotations
 

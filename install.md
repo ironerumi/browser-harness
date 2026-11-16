@@ -10,10 +10,9 @@ Use once. For browser work, read `SKILL.md`.
 ## Fast Path
 
 ```bash
-# From a durable checkout of this fork:
-uv tool install --python 3.12 --editable .
-mkdir -p "${CODEX_HOME:-$HOME/.codex}/skills/browser-use"
-browser-harness skill > "${CODEX_HOME:-$HOME/.codex}/skills/browser-use/SKILL.md"
+uv tool install --python 3.12 --upgrade --force browser-harness
+mkdir -p "${CODEX_HOME:-$HOME/.codex}/skills/browser-harness"
+browser-harness skill > "${CODEX_HOME:-$HOME/.codex}/skills/browser-harness/SKILL.md"
 browser-harness <<'PY'
 print(page_info())
 PY
@@ -21,44 +20,15 @@ PY
 
 If `page_info()` prints, configure recording consent below, then stop.
 
-Keep the editable checkout in place. Installing `browser-harness` or `browser-use`
-from PyPI alone does not install this fork's browser-selection or telemetry policy.
-Dependency versions are owned by `pyproject.toml`.
+`--python 3.12` prevents uv from selecting old releases that support older Python versions. `--upgrade --force` replaces any previous `browser-harness` tool install with the latest stable release. It does not uninstall unrelated commands such as `browser-use-Browser` or `browser-use-Terminal`.
 
-For Claude Code or other agents: install this fork, register a skill named `browser-use`, use `browser-harness skill` as the body, and use this trigger:
+For Claude Code or other agents: install `browser-harness`, register a skill named `browser-harness`, use `browser-harness skill` as the body, and use this trigger:
 
 ```text
 Always use browser-harness for any web interaction: automation, scraping, testing, or site/app work.
 ```
 
-Replace stale user-installed browser skills with this fork's skill. Do not edit bundled/vendor plugin caches.
-
-## Automation browser selection
-
-Both `browser-harness` and `browser-harness-mcp` read
-`~/.config/automation-browser/config`, provisioned by dotfiles
-`scripts/setup-automation-browser.sh`. With `kind=chrome`, a `BU_NAME` starting
-with `ai-search` selects `ai-search.port`; every other name, including no name,
-selects `work.port`. These ports are used on `127.0.0.1`.
-
-An explicit `BU_CDP_URL`, `BU_CDP_WS`, or `BU_BROWSER_ID` overrides this selection.
-Without the config file, upstream browser discovery is unchanged. With the file,
-a non-Chrome kind or missing/non-numeric identity port stops with setup instructions
-instead of falling back to everyday Chrome.
-
-For config-selected endpoints, a reused daemon must prove it is attached to the
-selected browser. A mismatched or unverifiable daemon is refused; stop it with
-`BU_NAME=<same-name> browser-harness --reload`, then retry (use `default` when no
-name was set).
-
-## Telemetry
-
-Telemetry is hard-disabled in this fork because upstream sends task scripts and
-output tails to PostHog, while this fork drives logged-in work pages.
-`browser-harness telemetry status` reports `enabled: false` without creating an
-installation ID. `telemetry enable` cannot enable it; `telemetry disable` reports
-the effective state without changing preferences. Local recording consent is
-separate.
+If an old user-installed `browser` or `browser-use` skill is being picked instead, remove that stale skill directory manually. Do not edit bundled/vendor plugin caches.
 
 ## Recording Consent
 
@@ -126,7 +96,7 @@ Use the output:
 
 - `chrome running` FAIL: ask the user to open Chrome, or use isolated/cloud browser.
 - `daemon alive` FAIL: Chrome remote debugging permission is missing, Chrome is closed, or the CDP endpoint is not reachable.
-- update available: update this fork's checkout deliberately. `--update` checks PyPI versions before updating; it pulls Git checkouts but upgrades PyPI installations from PyPI.
+- update available: run `browser-harness --update -y` when you decide to upgrade.
 
 For a machine-readable health check, an orchestrator can set `BU_NAME` to an
 already-provisioned daemon and run:
@@ -143,7 +113,8 @@ If this still fails, inspect `src/browser_harness/admin.py`, `src/browser_harnes
 Useful:
 
 ```bash
-browser-harness telemetry status
+browser-harness --update -y
+browser-harness telemetry disable
 ```
 
-State lives under `${XDG_CONFIG_HOME:-~/.config}/browser-harness` by default: auth, agent workspace, runtime sockets, logs, screenshots, and temp files. Override with `BH_HOME` or `BROWSER_HARNESS_HOME`.
+State lives under `${XDG_CONFIG_HOME:-~/.config}/browser-harness` by default: auth, telemetry id, agent workspace, runtime sockets, logs, screenshots, and temp files. Override with `BH_HOME` or `BROWSER_HARNESS_HOME`.

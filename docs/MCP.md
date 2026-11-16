@@ -6,16 +6,15 @@ inside `src/browser_harness/`.
 
 ## Start
 
-Install this fork with its MCP extra from the checkout:
+From any directory:
 
 ```bash
-uv tool install --python 3.12 --editable '.[mcp]'
-browser-harness-mcp
+uvx --from 'browser-harness[mcp]' browser-harness-mcp
 ```
 
-The server speaks MCP stdio and uses the same
-[browser selection policy](../install.md#automation-browser-selection) as the CLI.
-The daemon auto-starts on the first tool call.
+The server speaks MCP stdio and connects to the same local Chrome CDP endpoint
+(9222/9223) used by `browser-harness`. The daemon auto-starts on the first tool
+call.
 
 ## Tools
 
@@ -61,13 +60,15 @@ server process keeps running.
 ### Claude Code
 
 ```bash
-claude mcp add browser-harness -- browser-harness-mcp
+claude mcp add browser-harness \
+  uvx --from 'browser-harness[mcp]' browser-harness-mcp
 ```
 
 ### Devin
 
 ```bash
-devin mcp add -s project browser-harness -- browser-harness-mcp
+devin mcp add -s project browser-harness -- \
+  uvx --from 'browser-harness[mcp]' browser-harness-mcp
 ```
 
 ### Cursor / OpenClaw / other MCP clients
@@ -76,7 +77,12 @@ devin mcp add -s project browser-harness -- browser-harness-mcp
 {
   "mcpServers": {
     "browser-harness": {
-      "command": "browser-harness-mcp"
+      "command": "uvx",
+      "args": [
+        "--from",
+        "browser-harness[mcp]",
+        "browser-harness-mcp"
+      ]
     }
   }
 }
@@ -85,7 +91,8 @@ devin mcp add -s project browser-harness -- browser-harness-mcp
 ### MCP Inspector
 
 ```bash
-npx @modelcontextprotocol/inspector browser-harness-mcp
+npx @modelcontextprotocol/inspector \
+  uvx --from 'browser-harness[mcp]' browser-harness-mcp
 ```
 
 From a repository checkout, `uv run --extra mcp browser-harness-mcp` runs the
