@@ -29,7 +29,7 @@ from .admin import (
     stop_remote_daemon,
     sync_local_profile,
 )
-from . import auth, recorder, telemetry
+from . import auth, automation_browser, recorder, telemetry
 from .helpers import *
 
 HELP = """Browser Harness
@@ -64,7 +64,7 @@ Commands:
   browser-harness video init <recording>      prepare a recording for editing
   browser-harness video review <recording>    compile and review the video
   browser-harness video export <recording> --reviewed   export a verified MP4
-  browser-harness telemetry status    show anonymous telemetry opt-out state
+  browser-harness telemetry status    show telemetry status (disabled in this fork)
   browser-harness --update [-y]    pull the latest version (agents: pass -y)
   browser-harness --reload         stop the daemon so next call picks up code changes
 """
@@ -242,6 +242,7 @@ def main():
     args = sys.argv[1:]
     if args and args[0] == "telemetry":
         sys.exit(telemetry.run_telemetry_cli(args[1:]))
+    automation_browser.apply()
     _helper_trace.clear()
     _helper_call_count = 0
     start_time = time.monotonic()

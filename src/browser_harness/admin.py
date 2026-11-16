@@ -10,7 +10,7 @@ import urllib.request
 from pathlib import Path
 
 from . import _ipc as ipc
-from . import auth
+from . import auth, automation_browser
 from . import paths
 
 
@@ -522,10 +522,35 @@ def run_doctor_fix_snap():
     return 0
 
 
+def _verify_daemon_endpoint(name=None, env=None):
+    selected = {**os.environ, **(env or {})}
+    expected = (selected.get("BU_CDP_URL") or "").rstrip("/")
+    configured = (selected.get(automation_browser.SELECTED_ENDPOINT) or "").rstrip("/")
+    if not expected or expected != configured or selected.get("BU_CDP_WS") or selected.get("BU_BROWSER_ID"):
+        return
+    c = None
+    try:
+        c, token = ipc.connect(name or NAME, timeout=3.0)
+        response = ipc.request(c, token, {"meta": "ping"})
+        actual = response.get("browser_ws_url")
+        if actual and actual == _cdp_ws_from_url(expected):
+            return
+    except Exception:
+        pass
+    finally:
+        if c is not None:
+            c.close()
+    raise RuntimeError(
+        f"daemon {name or NAME!r} browser endpoint does not match or cannot be verified; "
+        f"stop that daemon with BU_NAME={name or NAME} browser-harness --reload, then re-run"
+    )
+
+
 def ensure_daemon(wait=None, name=None, env=None):
     """Idempotent. Self-heals stale daemon, closed Chrome (launches it), cold
     Chrome, and missing Allow on chrome://inspect."""
     if daemon_alive(name):
+        _verify_daemon_endpoint(name, env)
         # Stale daemons accept connects AND reply to meta:* (pure Python) even when the
         # CDP WS to Chrome is dead — probe with a real CDP call and require "result".
         # Must go through ipc.connect so this works on Windows (TCP loopback) too;
@@ -569,6 +594,7 @@ def ensure_daemon(wait=None, name=None, env=None):
                 if lock.fd is None:
                     raise RuntimeError("daemon-starting: another browser-harness daemon is still starting; retry later")
                 if daemon_alive(name):
+                    _verify_daemon_endpoint(name, env)
                     if stderr_sink is not subprocess.DEVNULL:
                         stderr_sink.close()
                     return
@@ -596,6 +622,7 @@ def ensure_daemon(wait=None, name=None, env=None):
         pending_died = False
         while deadline is None or time.monotonic() < deadline:
             if daemon_alive(name):
+                _verify_daemon_endpoint(name, env)
                 _cleanup_unattached_browser_launch(launched_browser)
                 return
             if p is not None and p.poll() is not None:
@@ -718,6 +745,7 @@ def require_existing_daemon(name=None):
     daemon_name = name or NAME
     if not daemon_alive(daemon_name):
         raise RuntimeError(f"required daemon {daemon_name!r} is not running")
+    _verify_daemon_endpoint(daemon_name)
     try:
         s, token = ipc.connect(daemon_name, timeout=3.0)
         try:

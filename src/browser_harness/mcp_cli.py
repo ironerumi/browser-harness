@@ -3,6 +3,11 @@
 
 def main() -> None:
     """Run the MCP server, or explain how to install its optional dependency."""
+    from browser_harness import automation_browser
+    from browser_harness.admin import _load_env
+
+    _load_env()
+    automation_browser.apply()
     try:
         from mcp_server import main as run_server
     except ModuleNotFoundError as exc:

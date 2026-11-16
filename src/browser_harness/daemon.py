@@ -429,6 +429,7 @@ class _PatientCDPClient(CDPClient):
 class Daemon:
     def __init__(self):
         self.cdp = None
+        self.browser_ws_url = None
         self.session = None
         self.target_id = None
         self.dedicated_target_id = None
@@ -660,6 +661,7 @@ class Daemon:
                     "browser-harness did not retry or create another connection"
                 )
             raise RuntimeError(f"CDP WS handshake failed: {e} -- click Allow in Chrome if prompted, then retry")
+        self.browser_ws_url = url
         await self.attach_first_page()
         orig = self.cdp._event_registry.handle_event
         async def tap(method, params, session_id=None):
@@ -679,7 +681,9 @@ class Daemon:
         # daemon and not an unrelated process that reused our port post-crash.
         # `pid` lets restart_daemon() verify the live daemon's identity before
         # signaling — protects against SIGTERM-by-stale-pid-file after PID reuse.
-        if meta == "ping":        return {"pong": True, "pid": os.getpid(), "browser_kind": BROWSER_KIND}
+        if meta == "ping":
+            return {"pong": True, "pid": os.getpid(), "browser_kind": BROWSER_KIND,
+                    "browser_ws_url": self.browser_ws_url}
         if meta == "drain_events":
             out = list(self.events); self.events.clear()
             return {"events": out}

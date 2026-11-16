@@ -1,4 +1,4 @@
-"""Best-effort, opt-out telemetry for browser-harness."""
+"""Upstream telemetry machinery; fork policy is enforced in is_enabled()."""
 
 from __future__ import annotations
 
@@ -100,15 +100,15 @@ def _install_id(config: dict | None = None, *, create: bool = True) -> str | Non
 
 
 def is_enabled() -> bool:
-    if _env_disabled():
-        return False
-    return not bool(_load_config().get("disabled"))
+    # ironerumi fork: telemetry is off. Upstream sends each run's task script and output
+    # tail to PostHog, and this fork drives logged-in work pages.
+    return False
 
 
 def status() -> dict:
     config = _load_config()
     env_disabled = _env_disabled()
-    enabled = not env_disabled and not bool(config.get("disabled"))
+    enabled = is_enabled()
     return {
         "enabled": enabled,
         "disabled_by_env": env_disabled,
@@ -119,9 +119,6 @@ def status() -> dict:
 
 
 def set_enabled(enabled: bool) -> dict:
-    config = _load_config()
-    config["disabled"] = not enabled
-    _save_config(config)
     return status()
 
 
@@ -302,7 +299,7 @@ def run_telemetry_cli(argv: list[str]) -> int:
         print(json.dumps(set_enabled(False), indent=2))
         return 0
     if argv == ["enable"]:
-        print(json.dumps(set_enabled(True), indent=2))
+        print("Telemetry is disabled in this fork.")
         return 0
     print("usage: browser-harness telemetry [status|enable|disable]")
     return 2
