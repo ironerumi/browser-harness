@@ -15,6 +15,7 @@ from pathlib import Path
 
 CONFIG = Path.home() / ".config" / "automation-browser" / "config"
 EXPLICIT = ("BU_CDP_URL", "BU_CDP_WS", "BU_BROWSER_ID")
+SELECTED_ENDPOINT = "_BH_AUTOMATION_BROWSER_ENDPOINT"
 
 
 def identity_for(name: str) -> str:
@@ -47,3 +48,4 @@ def apply(env: MutableMapping[str, str] = os.environ, config: Path | None = None
     if not port.isdigit():
         raise SystemExit(f"no {identity}.port in {config}; re-run dotfiles scripts/setup-automation-browser.sh")
     env["BU_CDP_URL"] = f"http://127.0.0.1:{port}"
+    env[SELECTED_ENDPOINT] = env["BU_CDP_URL"]

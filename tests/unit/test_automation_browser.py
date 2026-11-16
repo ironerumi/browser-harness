@@ -2,6 +2,7 @@
 
 import asyncio
 import json
+import os
 from types import SimpleNamespace
 from unittest.mock import Mock
 
@@ -70,17 +71,21 @@ def test_telemetry_is_off(monkeypatch):
 
 
 @pytest.mark.parametrize("entry", ["ensure_daemon", "require_existing_daemon"])
+@pytest.mark.parametrize("trailing_slash", [False, True])
 @pytest.mark.parametrize("endpoint", [
     "ws://127.0.0.1:9223/devtools/browser/work",
     "ws://127.0.0.1:9222/devtools/browser/everyday",
     None,
 ])
-def test_reuse_requires_selected_browser(config, monkeypatch, entry, endpoint):
+def test_reuse_requires_selected_browser(config, monkeypatch, entry, endpoint, trailing_slash):
     from browser_harness import admin
 
     for key in automation_browser.EXPLICIT:
         monkeypatch.delenv(key, raising=False)
+    monkeypatch.setenv(automation_browser.SELECTED_ENDPOINT, "")
     automation_browser.apply(config=config)
+    if trailing_slash:
+        monkeypatch.setenv("BU_CDP_URL", os.environ["BU_CDP_URL"] + "/")
     monkeypatch.setattr(admin, "daemon_alive", lambda _name: True)
     sock = Mock()
     monkeypatch.setattr(admin.ipc, "connect", lambda _name, timeout: (sock, None))
@@ -110,6 +115,61 @@ def test_reuse_requires_selected_browser(config, monkeypatch, entry, endpoint):
             getattr(admin, entry)(name="scoped")
         assert methods == [{"meta": "ping"}]
     sock.close.assert_called()
+
+
+@pytest.mark.parametrize("entry", ["ensure_daemon", "require_existing_daemon"])
+@pytest.mark.parametrize(("configured", "explicit"), [
+    (False, None),
+    (False, "BU_CDP_URL"),
+    (False, "BU_CDP_WS"),
+    (False, "BU_BROWSER_ID"),
+    (True, "BU_CDP_URL"),
+    (True, "BU_CDP_WS"),
+    (True, "BU_BROWSER_ID"),
+])
+def test_upstream_reuse_without_config_selection(config, tmp_path, monkeypatch, entry, configured, explicit):
+    from browser_harness import admin
+
+    for key in (*automation_browser.EXPLICIT, automation_browser.SELECTED_ENDPOINT):
+        monkeypatch.delenv(key, raising=False)
+    if explicit:
+        monkeypatch.setenv(explicit, "http://127.0.0.1:9333/" if explicit == "BU_CDP_URL" else "given")
+    automation_browser.apply(config=config if configured else tmp_path / "missing")
+    monkeypatch.setattr(admin, "daemon_alive", lambda _name: True)
+    sock = Mock()
+    monkeypatch.setattr(admin.ipc, "connect", lambda _name, timeout: (sock, None))
+
+    def request(_sock, _token, req):
+        assert req == {"method": "Target.getTargets", "params": {}}
+        return {"result": {"targetInfos": []}}
+
+    monkeypatch.setattr(admin.ipc, "request", request)
+    monkeypatch.setattr(admin.urllib.request, "urlopen", lambda *a, **kw: pytest.fail("must not resolve endpoint"))
+    monkeypatch.setattr(admin.subprocess, "Popen", lambda *a, **kw: pytest.fail("must not spawn"))
+    getattr(admin, entry)(name="scoped")
+
+
+@pytest.mark.parametrize("entry", ["ensure_daemon", "require_existing_daemon"])
+@pytest.mark.parametrize("explicit", automation_browser.EXPLICIT)
+def test_explicit_override_after_config_selection(config, monkeypatch, entry, explicit):
+    from browser_harness import admin
+
+    for key in automation_browser.EXPLICIT:
+        monkeypatch.delenv(key, raising=False)
+    monkeypatch.setenv(automation_browser.SELECTED_ENDPOINT, "")
+    automation_browser.apply(config=config)
+    monkeypatch.setenv(explicit, "http://127.0.0.1:9333/" if explicit == "BU_CDP_URL" else "given")
+    monkeypatch.setattr(admin, "daemon_alive", lambda _name: True)
+    sock = Mock()
+    monkeypatch.setattr(admin.ipc, "connect", lambda _name, timeout: (sock, None))
+
+    def request(_sock, _token, req):
+        assert req == {"method": "Target.getTargets", "params": {}}
+        return {"result": {"targetInfos": []}}
+
+    monkeypatch.setattr(admin.ipc, "request", request)
+    monkeypatch.setattr(admin.urllib.request, "urlopen", lambda *a, **kw: pytest.fail("must not resolve endpoint"))
+    getattr(admin, entry)(name="scoped")
 
 
 def test_daemon_reports_connected_endpoint(monkeypatch):

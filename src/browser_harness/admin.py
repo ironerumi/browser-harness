@@ -10,7 +10,7 @@ import urllib.request
 from pathlib import Path
 
 from . import _ipc as ipc
-from . import auth
+from . import auth, automation_browser
 from . import paths
 
 
@@ -524,8 +524,9 @@ def run_doctor_fix_snap():
 
 def _verify_daemon_endpoint(name=None, env=None):
     selected = {**os.environ, **(env or {})}
-    expected = selected.get("BU_CDP_URL")
-    if not expected or selected.get("BU_CDP_WS") or selected.get("BU_BROWSER_ID"):
+    expected = (selected.get("BU_CDP_URL") or "").rstrip("/")
+    configured = (selected.get(automation_browser.SELECTED_ENDPOINT) or "").rstrip("/")
+    if not expected or expected != configured or selected.get("BU_CDP_WS") or selected.get("BU_BROWSER_ID"):
         return
     c = None
     try:
