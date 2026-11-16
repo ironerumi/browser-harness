@@ -1,17 +1,9 @@
 <img src="https://raw.githubusercontent.com/browser-use/media/main/browser-harness/banner-ink.svg" alt="Browser Harness" width="100%" />
 
 > [!NOTE]
-> **Browser Harness is now the engine inside [Browser Use](https://github.com/browser-use/browser-use).** Use the `browser-use` CLI: same helpers and daemon, plus `browser-use login`, an MCP server (`browser-use --cli-mcp`) and `browser-use skill install`.
+> **This fork uses `browser-harness` for browser automation.** Install this checkout, not the upstream PyPI package; see [install.md](install.md) for setup, automation-browser identity selection, and telemetry policy.
 >
-> ```bash
-> uv tool install browser-use
-> browser-use <<'PY'
-> new_tab("https://example.com")
-> print(page_info())
-> PY
-> ```
->
-> The `browser-harness` command keeps working. Domain skills and interaction skills stay in this repo.
+> It includes Browser Use's numbered-element helpers (`bu.state()`, `bu.click(id)`, `bu.type(id, text)`) via `browser_use.ax`, reusing the same daemon.
 
 # Browser Harness ♞
 
@@ -42,11 +34,12 @@ Try browser-harness in [Browser Use Cloud](https://cloud.browser-use.com/v4?utm_
 Paste into Claude Code or Codex (Cursor: use the [MCP config](#cursor) below):
 
 ```text
-Install browser-use with `uv tool install browser-use`, run `browser-use skill install` to register the skill, and connect it to my browser. If setup or connection fails, run `browser-use --doctor` and follow its output and the error message.
+Follow install.md in this browser-harness fork to install the checkout, register its browser-use skill, and connect to the configured automation browser. If setup or connection fails, run `browser-harness --doctor` and follow its output and the error message.
 ```
 
-The agent will open `chrome://inspect/#remote-debugging`. On first setup, tick
-the checkbox so the agent can connect to your browser:
+On hosts without an automation-browser config, local Chrome discovery uses
+`chrome://inspect/#remote-debugging`. For that setup, tick the checkbox so the
+agent can connect to your browser:
 
 <img src="docs/setup-remote-debugging.png" alt="Remote debugging setup" width="520" style="border-radius: 12px;" />
 
@@ -105,23 +98,20 @@ Use your local browser for logged-in, personal work. When you want many browsers
 
 ## MCP server
 
-`browser-use --cli-mcp` exposes the browser control helpers as MCP tools over
-stdio, so any MCP client (Claude Code, Devin, Cursor, etc.) can drive the
-browser without writing a second CDP layer. The older `browser-harness-mcp`
-keeps working; see [docs/MCP.md](docs/MCP.md).
+`browser-harness-mcp` exposes browser control helpers over stdio using this
+fork's browser selection. See [docs/MCP.md](docs/MCP.md).
 
 ### Cursor
 
 Add this to `.cursor/mcp.json` in your project, or to `~/.cursor/mcp.json` for
-every project. It needs [uv](https://docs.astral.sh/uv/).
+every project, after installing this fork per [install.md](install.md).
 
 ```json
 {
   "mcpServers": {
-    "browser-use": {
+    "browser-harness": {
       "type": "stdio",
-      "command": "uvx",
-      "args": ["browser-use", "--cli-mcp"]
+      "command": "browser-harness-mcp"
     }
   }
 }

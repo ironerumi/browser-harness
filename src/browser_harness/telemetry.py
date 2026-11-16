@@ -1,4 +1,4 @@
-"""Best-effort, opt-out telemetry for browser-harness."""
+"""Upstream telemetry machinery; fork policy is documented in install.md."""
 
 from __future__ import annotations
 

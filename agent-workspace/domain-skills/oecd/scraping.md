@@ -348,7 +348,7 @@ Output (from the run on 2026-11-14, 23:36 UTC):
 2026-10 DEU Germany 101.1611 Amplitude adjusted Normal value
 2026-10 USA United States 100.9566 Amplitude adjusted Normal value
 2026-10 JPN Japan 100.2095 Amplitude adjusted Normal value
-HTTP/2 200 
+HTTP/2 200
 content-type: application/vnd.sdmx.data+csv; labels=name; version=2; charset=utf-8
 cache-control: public,max-age=7200
 server: cloudflare
