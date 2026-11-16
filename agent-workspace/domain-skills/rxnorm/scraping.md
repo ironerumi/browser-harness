@@ -497,7 +497,7 @@ BN: Lipitor, Atorvaliq, Caduet
 19 SCD, single-ingredient: atorvastatin 10 MG Oral Tablet; atorvastatin 20 MG Oral Tablet; atorvastatin 4 MG/ML Oral Suspension; atorvastatin 40 MG Oral Tablet; atorvastatin 80 MG Oral Tablet
 {'BPCK': 0, 'GPCK': 0, 'SBD': 13, 'SCD': 19}
 {"version":"02-Nov-2026","apiVersion":"3.1.357"}
-HTTP/2 200
+HTTP/2 200 
 content-type: application/json;charset=utf-8
 etag: W/"20AA_261102F;1793130400;3.1.357"
 cache-control: public, max-age=300, must-revalidate

@@ -525,7 +525,7 @@ PYSEC-2026-1471 CVE-2025-27516,GHSA-cpwx-vrp4-4pq7 - fixed 3.1.6
 PYSEC-2026-1473 CVE-2024-22195,GHSA-h5c8-rqwp-cp95 - fixed 3.1.3
 PYSEC-2026-1474 CVE-2024-34064,GHSA-h75v-3vvj-5mfj - fixed 3.1.4
 PYSEC-2026-1475 CVE-2024-56326,GHSA-q2x7-8rv6-6q7h - fixed 3.1.5
-HTTP/2 200
+HTTP/2 200 
 content-type: application/json
 content-length: 27426
 access-control-allow-origin: https://example.com

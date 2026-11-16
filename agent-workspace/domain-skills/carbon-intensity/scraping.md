@@ -321,8 +321,8 @@ Output (from the run on 2026-11-12, 23:34 UTC):
 
 ```text
 North West England 2026-11-12T23:00Z -> 2026-11-12T23:30Z UTC: 22 gCO2/kWh 'very low' wind 45.7 %
-{
-  "data":[{
+{ 
+  "data":[{ 
     "from": "2026-11-12T23:00Z",
     "to": "2026-11-12T23:30Z",
     "intensity": {
