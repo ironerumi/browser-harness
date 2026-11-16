@@ -381,4 +381,3 @@ next month (2026-10): HTTP 200, 2 bytes
 - **Months before 2023-10:** HTTP 404 on the API. The archive (`https://data.police.uk/data/archive/[year]-[month].zip`, about page) holds the bulk CSVs; not tested.
 - **Police crests or logos:** not licensed under the OGL; not used.
 - **Not tested:** www.police.uk (the public crime map), `crimes-at-location`, `outcomes-at-location`, stop-and-search methods, neighbourhood team and events methods, rate-limit behaviour (never provoked).
-
